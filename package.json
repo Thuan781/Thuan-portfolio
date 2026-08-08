@@ -1,0 +1,12 @@
+{
+  "name": "neon-portfolio",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Portfolio site with a Three.js neon 3D background. The site itself is static — three is only used to bake models/hero.glb.",
+  "scripts": {
+    "export:model": "node scripts/export-hero.mjs"
+  },
+  "devDependencies": {
+    "three": "^0.160.0"
+  }
+}
