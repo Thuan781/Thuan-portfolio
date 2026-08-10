@@ -2,11 +2,17 @@
   "name": "neon-portfolio",
   "version": "1.0.0",
   "private": true,
-  "description": "Portfolio site with a Three.js neon 3D background. The site itself is static — three is only used to bake models/hero.glb.",
+  "description": "Portfolio site with a bundled Three.js neon 3D background.",
   "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
     "export:model": "node scripts/export-hero.mjs"
   },
-  "devDependencies": {
+  "dependencies": {
     "three": "^0.160.0"
+  },
+  "devDependencies": {
+    "vite": "^7.1.0"
   }
 }
