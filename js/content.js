@@ -156,11 +156,11 @@ window.SITE_CONTENT = {
     titleAccent: "TOUCH",
     subtitle: "Interested in IT operations, incident management, middleware, Data Science, or AI? My inbox is open.",
     email: "kthuan781@gmail.com",
-    linkedin: "https://www.linkedin.com/in/thuankubuankamei-010925261/",
+    linkedin: "https://www.linkedin.com/in/thuankubuan-kamei-010925261/",
   },
 
   socials: [
-    { label: "LinkedIn", url: "https://www.linkedin.com/in/thuankubuankamei-010925261/" },
+    { label: "LinkedIn", url: "https://www.linkedin.com/in/thuankubuan-kamei-010925261/" },
     { label: "GitHub", url: "https://github.com/Thuan781" },
   ],
 };
