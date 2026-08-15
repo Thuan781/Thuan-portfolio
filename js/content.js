@@ -10,8 +10,8 @@ window.SITE_CONTENT = {
   hero: {
     kicker: "Hello, I'm Thuankubuan Kamei",
     title1: "IT ANALYST |",
-    titleAccent: "MIDDLEWARE",
-    title2: "DATA SCIENCE &",
+    titleAccent: "DATA SCIENCE &",
+    title2: "",
     titleNeon: "AI",
     roleLine: "IT Analyst | Middleware | ITIL | Data Science & AI",
     subtitle: "IT professional combining enterprise operations experience with Data Science, AI, and machine learning skills.",
