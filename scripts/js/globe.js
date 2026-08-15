@@ -3,59 +3,71 @@ import * as THREE from "three";
 const canvas = document.getElementById("globe3d");
 if (canvas) {
   const scene = new THREE.Scene();
-  const camera = new THREE.PerspectiveCamera(42, 1, 0.1, 100);
-  camera.position.set(0, 0, 6.4);
+  const camera = new THREE.PerspectiveCamera(40, 1, 0.1, 100);
+  camera.position.set(0, 0.1, 6.7);
 
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
   renderer.setClearColor(0x000000, 0);
+  renderer.outputColorSpace = THREE.SRGBColorSpace;
 
   const globe = new THREE.Group();
+  globe.rotation.x = -0.12;
+  globe.rotation.z = -0.06;
   scene.add(globe);
 
-  const core = new THREE.Mesh(
-    new THREE.SphereGeometry(2, 72, 72),
-    new THREE.MeshPhongMaterial({
-      color: 0x061321,
-      emissive: 0x02131e,
-      emissiveIntensity: 1.4,
-      shininess: 35,
-      transparent: true,
-      opacity: 0.92,
-    })
+  const textureLoader = new THREE.TextureLoader();
+  const earthMat = new THREE.MeshPhongMaterial({
+    color: 0x51a8ff,
+    emissive: 0x06152d,
+    emissiveIntensity: 1.0,
+    specular: 0x8edfff,
+    shininess: 18,
+  });
+
+  textureLoader.load(
+    "https://threejs.org/examples/textures/planets/earth_atmos_2048.jpg",
+    (tex) => {
+      tex.colorSpace = THREE.SRGBColorSpace;
+      earthMat.map = tex;
+      earthMat.needsUpdate = true;
+    }
   );
-  globe.add(core);
+
+  const earth = new THREE.Mesh(new THREE.SphereGeometry(2.02, 96, 96), earthMat);
+  globe.add(earth);
 
   const wire = new THREE.Mesh(
-    new THREE.SphereGeometry(2.025, 34, 22),
+    new THREE.SphereGeometry(2.055, 44, 28),
     new THREE.MeshBasicMaterial({
-      color: 0x19d9ff,
+      color: 0x22dfff,
       wireframe: true,
       transparent: true,
-      opacity: 0.14,
+      opacity: 0.13,
+      blending: THREE.AdditiveBlending,
     })
   );
   globe.add(wire);
 
-  const dotCount = 4200;
-  const positions = new Float32Array(dotCount * 3);
+  const dotCount = 5200;
+  const dotPositions = new Float32Array(dotCount * 3);
   for (let i = 0; i < dotCount; i++) {
     const phi = Math.acos(2 * Math.random() - 1);
     const theta = Math.random() * Math.PI * 2;
-    const r = 2.045 + Math.random() * 0.015;
-    positions[i * 3] = r * Math.sin(phi) * Math.cos(theta);
-    positions[i * 3 + 1] = r * Math.cos(phi);
-    positions[i * 3 + 2] = r * Math.sin(phi) * Math.sin(theta);
+    const r = 2.075 + Math.random() * 0.016;
+    dotPositions[i * 3] = r * Math.sin(phi) * Math.cos(theta);
+    dotPositions[i * 3 + 1] = r * Math.cos(phi);
+    dotPositions[i * 3 + 2] = r * Math.sin(phi) * Math.sin(theta);
   }
   const dotsGeo = new THREE.BufferGeometry();
-  dotsGeo.setAttribute("position", new THREE.BufferAttribute(positions, 3));
+  dotsGeo.setAttribute("position", new THREE.BufferAttribute(dotPositions, 3));
   const dots = new THREE.Points(
     dotsGeo,
     new THREE.PointsMaterial({
-      color: 0x42ddff,
-      size: 0.018,
+      color: 0x54e7ff,
+      size: 0.014,
       transparent: true,
-      opacity: 0.78,
+      opacity: 0.46,
       blending: THREE.AdditiveBlending,
       depthWrite: false,
     })
@@ -63,76 +75,118 @@ if (canvas) {
   globe.add(dots);
 
   const atmosphere = new THREE.Mesh(
-    new THREE.SphereGeometry(2.13, 64, 64),
+    new THREE.SphereGeometry(2.16, 72, 72),
     new THREE.MeshBasicMaterial({
-      color: 0x5b7cff,
+      color: 0x4f7dff,
       side: THREE.BackSide,
       transparent: true,
-      opacity: 0.10,
+      opacity: 0.14,
       blending: THREE.AdditiveBlending,
     })
   );
   globe.add(atmosphere);
 
-  const makeRing = (radius, color, tiltX, tiltZ, opacity = 0.32) => {
-    const mesh = new THREE.Mesh(
-      new THREE.TorusGeometry(radius, 0.011, 8, 220),
-      new THREE.MeshBasicMaterial({ color, transparent: true, opacity })
+  const outerGlow = new THREE.Mesh(
+    new THREE.SphereGeometry(2.24, 72, 72),
+    new THREE.MeshBasicMaterial({
+      color: 0x22dfff,
+      side: THREE.BackSide,
+      transparent: true,
+      opacity: 0.045,
+      blending: THREE.AdditiveBlending,
+    })
+  );
+  globe.add(outerGlow);
+
+  const makeOrbit = (radius, color, tiltX, tiltY, tiltZ, opacity) => {
+    const ring = new THREE.Mesh(
+      new THREE.TorusGeometry(radius, 0.012, 8, 260),
+      new THREE.MeshBasicMaterial({ color, transparent: true, opacity, blending: THREE.AdditiveBlending })
     );
-    mesh.rotation.x = tiltX;
-    mesh.rotation.z = tiltZ;
-    globe.add(mesh);
-    return mesh;
+    ring.rotation.set(tiltX, tiltY, tiltZ);
+    globe.add(ring);
+    return ring;
+  };
+  const ringA = makeOrbit(2.42, 0x26e6ff, 1.15, 0.10, 0.12, 0.48);
+  const ringB = makeOrbit(2.58, 0x8b5cf6, 0.76, 0.55, -0.42, 0.40);
+  const ringC = makeOrbit(2.72, 0x367cff, 1.48, -0.30, 0.68, 0.27);
+
+  const latLon = (lat, lon, radius = 2.10) => {
+    const phi = (90 - lat) * Math.PI / 180;
+    const theta = (lon + 180) * Math.PI / 180;
+    return new THREE.Vector3(
+      -radius * Math.sin(phi) * Math.cos(theta),
+      radius * Math.cos(phi),
+      radius * Math.sin(phi) * Math.sin(theta)
+    );
   };
 
-  const ringA = makeRing(2.42, 0x24dbff, 1.12, 0.18, 0.36);
-  const ringB = makeRing(2.55, 0x8b5cf6, 0.66, -0.52, 0.28);
-  const ringC = makeRing(2.65, 0x5f7cff, 1.48, 0.78, 0.20);
+  const arcPairs = [
+    [[28.6,77.2],[35.7,139.7]], [[28.6,77.2],[1.35,103.8]],
+    [[35.7,139.7],[37.8,-122.4]], [[1.35,103.8],[-33.9,151.2]],
+    [[25.2,55.3],[51.5,-0.1]], [[19.1,72.9],[40.7,-74.0]],
+    [[13.7,100.5],[34.1,-118.2]], [[31.2,121.5],[52.5,13.4]]
+  ];
+
+  const arcGroup = new THREE.Group();
+  arcPairs.forEach((pair, i) => {
+    const a = latLon(pair[0][0], pair[0][1]);
+    const b = latLon(pair[1][0], pair[1][1]);
+    const mid = a.clone().add(b).multiplyScalar(0.5).normalize().multiplyScalar(2.9 + (i % 3) * 0.18);
+    const curve = new THREE.QuadraticBezierCurve3(a, mid, b);
+    const tube = new THREE.Mesh(
+      new THREE.TubeGeometry(curve, 56, 0.009, 6, false),
+      new THREE.MeshBasicMaterial({
+        color: i % 3 === 0 ? 0xb04cff : 0x23dfff,
+        transparent: true,
+        opacity: 0.78,
+        blending: THREE.AdditiveBlending,
+      })
+    );
+    arcGroup.add(tube);
+  });
+  globe.add(arcGroup);
 
   const nodeGroup = new THREE.Group();
-  for (let i = 0; i < 24; i++) {
-    const phi = Math.acos(2 * Math.random() - 1);
-    const theta = Math.random() * Math.PI * 2;
-    const r = 2.18;
+  const nodeCities = [[28.6,77.2],[35.7,139.7],[1.35,103.8],[-33.9,151.2],[25.2,55.3],[51.5,-0.1],[37.8,-122.4],[40.7,-74.0],[31.2,121.5]];
+  nodeCities.forEach((c, i) => {
     const node = new THREE.Mesh(
-      new THREE.SphereGeometry(0.024 + Math.random() * 0.022, 10, 10),
-      new THREE.MeshBasicMaterial({ color: i % 4 === 0 ? 0x9d5cff : 0x29dfff })
+      new THREE.SphereGeometry(0.035, 12, 12),
+      new THREE.MeshBasicMaterial({ color: i % 3 === 0 ? 0xbb55ff : 0x39e7ff })
     );
-    node.position.set(
-      r * Math.sin(phi) * Math.cos(theta),
-      r * Math.cos(phi),
-      r * Math.sin(phi) * Math.sin(theta)
-    );
+    node.position.copy(latLon(c[0], c[1], 2.12));
     nodeGroup.add(node);
-  }
+  });
   globe.add(nodeGroup);
 
-  const baseRing = new THREE.Mesh(
-    new THREE.TorusGeometry(2.35, 0.025, 12, 180),
-    new THREE.MeshBasicMaterial({ color: 0x1adfff, transparent: true, opacity: 0.55 })
+  const base = new THREE.Group();
+  const baseRing1 = new THREE.Mesh(
+    new THREE.TorusGeometry(2.38, 0.025, 10, 220),
+    new THREE.MeshBasicMaterial({ color: 0x20dfff, transparent: true, opacity: 0.76, blending: THREE.AdditiveBlending })
   );
-  baseRing.rotation.x = Math.PI / 2;
-  baseRing.position.y = -2.15;
-  scene.add(baseRing);
-
   const baseRing2 = new THREE.Mesh(
-    new THREE.TorusGeometry(2.7, 0.008, 8, 180),
-    new THREE.MeshBasicMaterial({ color: 0x8b5cf6, transparent: true, opacity: 0.34 })
+    new THREE.TorusGeometry(2.72, 0.011, 8, 220),
+    new THREE.MeshBasicMaterial({ color: 0x7b55ff, transparent: true, opacity: 0.50, blending: THREE.AdditiveBlending })
   );
-  baseRing2.rotation.x = Math.PI / 2;
-  baseRing2.position.y = -2.18;
-  scene.add(baseRing2);
+  const baseRing3 = new THREE.Mesh(
+    new THREE.TorusGeometry(3.05, 0.005, 8, 220),
+    new THREE.MeshBasicMaterial({ color: 0x1f70ff, transparent: true, opacity: 0.25 })
+  );
+  [baseRing1, baseRing2, baseRing3].forEach((r) => { r.rotation.x = Math.PI / 2; r.position.y = -2.28; base.add(r); });
+  scene.add(base);
 
-  scene.add(new THREE.AmbientLight(0x163a5c, 1.1));
-  const cyanLight = new THREE.PointLight(0x20dfff, 13, 15);
-  cyanLight.position.set(-3, 2, 4);
-  scene.add(cyanLight);
-  const purpleLight = new THREE.PointLight(0x8b5cf6, 12, 15);
-  purpleLight.position.set(3, 1.5, 3);
-  scene.add(purpleLight);
+  scene.add(new THREE.AmbientLight(0x17375c, 1.6));
+  const key = new THREE.DirectionalLight(0x6edfff, 3.4);
+  key.position.set(-4, 3, 6);
+  scene.add(key);
+  const cyan = new THREE.PointLight(0x20dfff, 18, 16);
+  cyan.position.set(-3.3, 1.5, 4.5);
+  scene.add(cyan);
+  const purple = new THREE.PointLight(0xa855f7, 17, 16);
+  purple.position.set(3.2, 2.2, 3.2);
+  scene.add(purple);
 
-  let mx = 0;
-  let my = 0;
+  let mx = 0, my = 0;
   window.addEventListener("pointermove", (e) => {
     mx = (e.clientX / window.innerWidth - 0.5) * 2;
     my = (e.clientY / window.innerHeight - 0.5) * 2;
@@ -153,14 +207,16 @@ if (canvas) {
   function animate() {
     requestAnimationFrame(animate);
     const t = clock.getElapsedTime();
-    globe.rotation.y = t * 0.13 + mx * 0.07;
-    globe.rotation.x += ((-my * 0.05) - globe.rotation.x) * 0.03;
-    ringA.rotation.z += 0.0014;
-    ringB.rotation.z -= 0.0010;
-    ringC.rotation.y += 0.0012;
-    nodeGroup.rotation.y = -t * 0.07;
-    baseRing.rotation.z = t * 0.045;
-    baseRing2.rotation.z = -t * 0.032;
+    globe.rotation.y = 0.42 + t * 0.065 + mx * 0.035;
+    globe.rotation.x += ((-0.10 - my * 0.035) - globe.rotation.x) * 0.025;
+    ringA.rotation.z += 0.0010;
+    ringB.rotation.z -= 0.0008;
+    ringC.rotation.y += 0.0007;
+    arcGroup.children.forEach((arc, i) => { arc.material.opacity = 0.58 + Math.sin(t * 1.5 + i) * 0.20; });
+    nodeGroup.children.forEach((node, i) => { const s = 1 + Math.sin(t * 2.3 + i) * 0.35; node.scale.setScalar(s); });
+    baseRing1.rotation.z = t * 0.035;
+    baseRing2.rotation.z = -t * 0.025;
+    baseRing3.rotation.z = t * 0.018;
     renderer.render(scene, camera);
   }
   animate();
