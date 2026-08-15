@@ -1,19 +1,19 @@
 window.SITE_CONTENT = {
   name: "Thuankubuan Kamei",
-  role: "IT Analyst",
+  role: "IT Analyst | Middleware | ITIL | Data Science & AI",
   location: "India",
   photo: "images/me.png",
 
-  pageTitle: "Thuankubuan Kamei — IT Analyst | Data Science & AI",
+  pageTitle: "Thuankubuan Kamei — IT Analyst | Middleware | ITIL | Data Science & AI",
   metaDescription: "Portfolio of Thuankubuan Kamei — IT Analyst experienced in IT Operations, Middleware Support, SQL, Data Science and AI.",
 
   hero: {
     kicker: "Hello, I'm Thuankubuan Kamei",
-    title1: "IT",
-    titleAccent: "ANALYST",
+    title1: "IT ANALYST |",
+    titleAccent: "MIDDLEWARE",
     title2: "DATA SCIENCE &",
     titleNeon: "AI",
-    roleLine: "IT Analyst | Data Science & AI",
+    roleLine: "IT Analyst | Middleware | ITIL | Data Science & AI",
     subtitle: "IT professional combining enterprise operations experience with Data Science, AI, and machine learning skills.",
   },
 
